@@ -26,43 +26,81 @@ export default function Home() {
     setPage(value);
   };
 
-  const { data: ordersData, refetch: refetchOrders } = useQuery<{ data: CardResponse }>({
-    queryFn: api.getOrders({
-      userId,
-      role,
-      status: STATUS[TABS_LIST[tab]],
-      take,
-      skip: (page - 1) * take,
-    }),
+  const { data: ordersData, refetch: refetchOrders } = useQuery<any>({
+    queryFn: async () => {
+      try {
+        const headers = new Headers()
+        headers.append("Content-Type", "application/json");
+        headers.append("ngrok-skip-browser-warning", "1")
+        
+        const skip = (page - 1) * take;
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/order/${userId}?take=${take}&skip=${skip}${STATUS[TABS_LIST[tab]] === STATUS.ALL ? "" : `&status=${STATUS[TABS_LIST[tab]]}`}&role=${role}`,
+          {
+            method: "GET",
+            headers,
+          }
+        );
+
+        return await response.json();
+
+      } catch (e) {
+        console.log(e)
+      }
+    },
     queryKey: ["orders", tab, page],
   });
 
-  const { data: translatorStatsData, refetch: refetchStats } = useQuery<{
-    data: TranslatorStatsResponse;
-  }>({
-    queryFn: api.getStats(userId),
+  // const { data: translatorStatsData, refetch: refetchStats } = useQuery<{
+  //   data: TranslatorStatsResponse;
+  // }>({
+  //   queryFn: api.getStats(userId),
+  //   queryKey: ["translator-stats"],
+  // });
+
+  const { data: translatorStatsData, refetch: refetchStats } = useQuery<any>({
+    queryFn: async () => {
+      try {
+        const headers = new Headers()
+        headers.append("Content-Type", "application/json");
+        headers.append("ngrok-skip-browser-warning", "1")
+        
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/translator/${userId}`,
+          {
+            method: "GET",
+            headers,
+          }
+        );
+
+        return await response.json();
+
+      } catch (e) {
+        console.log(e)
+      }
+    },
     queryKey: ["translator-stats"],
   });
 
-  console.log(translatorStatsData?.data);
+  console.log(ordersData?.data);
 
   return (
     <div className="flex flex-row gap-4 mt-10 pb-10">
       <TranslatorStats
         name={name}
         surname={surname}
-        total={translatorStatsData?.data.totalOrders ?? 0}
-        completed={translatorStatsData?.data.totalOrdersCompleted ?? 0}
-        inProgress={translatorStatsData?.data.totalOrdersInProgress ?? 0}
-        overdue={translatorStatsData?.data.totalOrdersOverdue ?? 0}
-        notStarted={translatorStatsData?.data.totalOrdersNotStarted ?? 0}
-        avatarUrl={translatorStatsData?.data.avatarPath ?? ""}
+        total={translatorStatsData?.totalOrders ?? 0}
+        completed={translatorStatsData?.totalOrdersCompleted ?? 0}
+        inProgress={translatorStatsData?.totalOrdersInProgress ?? 0}
+        overdue={translatorStatsData?.totalOrdersOverdue ?? 0}
+        notStarted={translatorStatsData?.totalOrdersNotStarted ?? 0}
+        avatarUrl={translatorStatsData?.avatarPath ?? ""}
         refetch={refetchStats}
       />
       <div className="flex flex-col gap-4">
         <Tabs tab={tab} handleChangeTab={handleChangeTab} />
-        {ordersData?.data?.data?.map((order) => (
-          <OrderCard key={order.id} {...order} refetch={refetchOrders}/>
+        {ordersData?.data?.map((order: any) => (
+          <OrderCard key={order.id} {...order} refetch={refetchOrders} />
         ))}
         <div className="flex items-center justify-center w-full">
           <Pagination

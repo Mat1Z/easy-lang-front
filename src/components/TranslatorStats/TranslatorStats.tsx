@@ -54,10 +54,10 @@ export const TranslatorStats: FC<TranslatorStats> = ({
     (file) => file.size > 3 * 1024 * 1024
   );
 
-  console.log(id)
-
-  const avatarPath = `${process.env.NEXT_PUBLIC_STATIC_URL}/${avatarUrl}`;
-
+  
+  const avatarPath = `${process.env.NEXT_PUBLIC_STATIC_URL}${avatarUrl}`;
+  console.log(avatarPath)
+  
   const handleOpenDialog = () => {
     setOpen((prev) => !prev);
   };
