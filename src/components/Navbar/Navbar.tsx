@@ -7,7 +7,7 @@ import { useState } from "react";
 
 export const Navbar = () => {
   const logout = useLogout();
-  const { name, surname } = useGetSessionData();
+  const { name, surname } = useGetSessionData() ;
   const [open, setOpen] = useState(false);
   const [notifications, setNotifications] = useState([
     {
